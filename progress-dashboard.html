@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Developer Journey — Progress</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --border:         rgba(11,11,11,0.10);
+    --series-blue:    #2a78d6;
+    --status-good:    #0ca30c;
+    --status-warn:    #fab219;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page:           #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --border:         rgba(255,255,255,0.10);
+      --series-blue:    #3987e5;
+      --status-good:    #0ca30c;
+      --status-warn:    #fab219;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page:           #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --border:         rgba(255,255,255,0.10);
+    --series-blue:    #3987e5;
+    --status-good:    #0ca30c;
+    --status-warn:    #fab219;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+  }
+  .viz-root { padding: 32px 20px 60px; max-width: 980px; margin: 0 auto; }
+
+  .theme-toggle {
+    position: fixed; top: 16px; right: 16px;
+    display: flex; gap: 4px; padding: 4px;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 8px; z-index: 10;
+  }
+  .theme-toggle button {
+    border: none; background: transparent; color: var(--text-secondary);
+    font-size: 12px; padding: 6px 10px; border-radius: 6px; cursor: pointer;
+    font-family: inherit;
+  }
+  .theme-toggle button.active { background: var(--series-blue); color: #fff; }
+
+  header { margin-bottom: 28px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .goal { color: var(--text-secondary); font-size: 14px; margin: 0; }
+  .goal b { color: var(--text-primary); }
+
+  .banner {
+    margin-top: 14px; padding: 10px 14px; border-radius: 8px;
+    background: color-mix(in srgb, var(--status-warn) 10%, var(--surface-1));
+    border: 1px solid color-mix(in srgb, var(--status-warn) 35%, var(--border));
+    font-size: 12.5px; color: var(--text-secondary);
+  }
+
+  .progress-track {
+    margin-top: 20px;
+    height: 10px; border-radius: 6px;
+    background: var(--gridline);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 6px;
+    background: var(--series-blue);
+    transition: width .3s ease;
+  }
+  .progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 12px; color: var(--text-muted); margin-top: 6px;
+  }
+
+  .stat-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin: 24px 0 32px;
+  }
+  .stat-tile {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+  }
+  .stat-tile .value {
+    font-size: 26px; font-weight: 600; font-variant-numeric: proportional-nums;
+  }
+  .stat-tile .label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  h2 {
+    font-size: 14px; text-transform: uppercase; letter-spacing: .04em;
+    color: var(--text-secondary); margin: 32px 0 12px;
+  }
+
+  .legend { display: flex; gap: 18px; margin-bottom: 14px; font-size: 12px; color: var(--text-secondary); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .dot.done { background: var(--status-good); }
+  .dot.current { background: var(--series-blue); }
+  .dot.upcoming { background: var(--text-muted); opacity: .5; }
+
+  .tier { margin-bottom: 22px; }
+  .tier-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-primary); }
+  .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
+  .project-card {
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+    background: var(--surface-1); font-size: 12.5px;
+  }
+  .project-card .pnum { color: var(--text-muted); font-size: 11px; }
+  .project-card .pname { font-weight: 600; margin: 2px 0 3px; }
+  .project-card .pdomain { color: var(--text-secondary); font-size: 11.5px; }
+  .project-card .pstatus {
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-top: 8px; font-size: 11px; font-weight: 600;
+  }
+  .project-card.done { border-color: color-mix(in srgb, var(--status-good) 35%, var(--border)); }
+  .project-card.current { border-color: color-mix(in srgb, var(--series-blue) 45%, var(--border)); background: color-mix(in srgb, var(--series-blue) 6%, var(--surface-1)); }
+  .project-card.upcoming { opacity: .6; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--gridline); }
+  th { color: var(--text-muted); font-weight: 500; font-size: 11.5px; text-transform: uppercase; letter-spacing: .03em; }
+  td.notes { color: var(--text-secondary); }
+  .conf { font-variant-numeric: tabular-nums; }
+
+  .shaky-list { list-style: none; padding: 0; margin: 0; font-size: 13px; }
+  .shaky-list li {
+    padding: 8px 10px; border-radius: 8px; background: var(--surface-1);
+    border: 1px solid var(--border); margin-bottom: 6px; color: var(--text-secondary);
+  }
+  .shaky-list li.flag { border-color: color-mix(in srgb, var(--status-warn) 45%, var(--border)); }
+
+  footer {
+    margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--gridline);
+    font-size: 11.5px; color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="theme-toggle" role="group" aria-label="Theme toggle">
+  <button id="btn-light" onclick="setTheme('light')">Light</button>
+  <button id="btn-dark" onclick="setTheme('dark')">Dark</button>
+</div>
+
+<div class="viz-root">
+  <header>
+    <h1>Claude Developer Journey</h1>
+    <p class="goal">Goal: <b>Claude Certified Developer &ndash; Foundations</b> &middot; Target: Nov 2026&ndash;Jan 2027 &middot; Started 2026-08-18</p>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-label"><span id="progress-text"></span><span id="progress-pct"></span></div>
+  </header>
+
+  <div class="stat-row" id="stat-row"></div>
+
+  <h2>Project Ladder</h2>
+  <div class="legend">
+    <span><span class="dot done"></span>Completed</span>
+    <span><span class="dot current"></span>In progress</span>
+    <span><span class="dot upcoming"></span>Upcoming</span>
+  </div>
+  <div id="tiers"></div>
+
+  <h2>Completed Projects</h2>
+  <table id="completed-table">
+    <thead><tr><th>#</th><th>Project</th><th>Finished</th><th>Confidence</th><th>Notes</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Concepts Still Shaky</h2>
+  <ul class="shaky-list" id="shaky-list"></ul>
+
+  <footer id="footer"></footer>
+</div>
+
+<script>
+// ---- DATA: your mentor updates this block after each project/milestone ----
+const DATA = {
+  lastUpdated: "2026-08-20",
+  // Project 4 "2+2" open item resolved: user confirmed tool_use triggered.
+  tiers: [
+    {
+      name: "Tier 1 — Foundations",
+      projects: [
+        { n: 1, name: "Hello, Claude Code", domain: "Claude API basics", status: "done", finished: "2026-08-18", confidence: 4,
+          notes: "git init/add/commit, .env + .gitignore, venv, first live Claude API call." },
+        { n: 2, name: "CLI To-Do App", domain: "Dev workflow / Claude Code fluency", status: "done", finished: "2026-08-19", confidence: 4,
+          notes: "Spec-writing for Claude Code, Manual-mode diff review, unittest w/ test isolation, git commit hygiene." },
+        { n: 3, name: "Structured Data Extractor", domain: "Structured outputs, prompt design", status: "done", finished: "2026-08-19", confidence: 3,
+          notes: "System prompts, JSON validation. Workflow pivot to hybrid approach happened here." },
+      ]
+    },
+    {
+      name: "Tier 2 — Tool Use & MCP",
+      projects: [
+        { n: 4, name: "Single-Tool Bot", domain: "Tool use", status: "done", finished: "2026-08-20", confidence: 3,
+          notes: "tool_use loop, stop_reason, stateless API, ** unpacking. First hybrid-workflow project (folder: Project4_Single_Tool_Bot). Confirmed \"2+2\" triggers the calculator tool." },
+        { n: 5, name: "Multi-Tool CLI Assistant", domain: "Tool use, agent basics", status: "current" },
+        { n: 6, name: "Your First MCP Server", domain: "MCP", status: "upcoming" },
+        { n: 7, name: "Claude Code Extensibility Lab", domain: "Claude Code workflows", status: "upcoming" },
+      ]
+    },
+    {
+      name: "Tier 3 — Production-Grade Agents",
+      projects: [
+        { n: 8, name: "RAG Docs Assistant", domain: "Agent development", status: "upcoming" },
+        { n: 9, name: "Guardrailed Automation Agent", domain: "Security & safe agent design", status: "upcoming" },
+        { n: 10, name: "Multi-Agent Orchestration", domain: "Advanced agent development", status: "upcoming" },
+        { n: 11, name: "Eval & Observability Harness", domain: "Evaluation & optimization", status: "upcoming" },
+      ]
+    },
+    {
+      name: "Tier 4 — Capstone",
+      projects: [
+        { n: 12, name: "Full-Stack Claude App", domain: "Applied integration", status: "upcoming" },
+        { n: 13, name: "Ship It", domain: "Deployment, cost/model optimization", status: "upcoming" },
+        { n: 14, name: "Security Review", domain: "Security", status: "upcoming" },
+        { n: 15, name: "Capstone (your choice)", domain: "Everything, integrated", status: "upcoming" },
+      ]
+    }
+  ],
+  shaky: [
+    "Environment variable lookup order beyond a single simple .env file.",
+    "Full range of Claude API error types beyond 400 (credit) / 401 (auth) — e.g. rate limits, overloaded errors.",
+    "Deeper coding/API fluency generally lighter going forward — will need dedicated review before the exam."
+  ]
+};
+// -----------------------------------------------------------------------
+
+const allProjects = DATA.tiers.flatMap(t => t.projects);
+const completed = allProjects.filter(p => p.status === "done");
+const totalProjects = allProjects.length;
+
+document.getElementById("progress-fill").style.width = (completed.length / totalProjects * 100) + "%";
+document.getElementById("progress-text").textContent = `${completed.length} of ${totalProjects} projects complete`;
+document.getElementById("progress-pct").textContent = Math.round(completed.length / totalProjects * 100) + "%";
+
+const currentTierIdx = DATA.tiers.findIndex(t => t.projects.some(p => p.status !== "done")) + 1;
+const avgConfidence = completed.length
+  ? (completed.reduce((s, p) => s + (p.confidence || 0), 0) / completed.length).toFixed(1)
+  : "—";
+const daysElapsed = Math.max(0, Math.round((new Date(DATA.lastUpdated) - new Date("2026-08-18")) / 86400000));
+
+const stats = [
+  { value: `${completed.length}/${totalProjects}`, label: "Projects complete" },
+  { value: `${currentTierIdx}/4`, label: "Current tier" },
+  { value: avgConfidence, label: "Avg. confidence (1–5)" },
+  { value: `Day ${daysElapsed + 1}`, label: "Since start (2026-08-18)" },
+];
+document.getElementById("stat-row").innerHTML = stats.map(s =>
+  `<div class="stat-tile"><div class="value">${s.value}</div><div class="label">${s.label}</div></div>`
+).join("");
+
+document.getElementById("tiers").innerHTML = DATA.tiers.map(tier => `
+  <div class="tier">
+    <div class="tier-title">${tier.name}</div>
+    <div class="project-grid">
+      ${tier.projects.map(p => `
+        <div class="project-card ${p.status}">
+          <div class="pnum">Project ${p.n}</div>
+          <div class="pname">${p.name}</div>
+          <div class="pdomain">${p.domain}</div>
+          <div class="pstatus" style="color: ${
+            p.status === 'done' ? 'var(--status-good)' : p.status === 'current' ? 'var(--series-blue)' : 'var(--text-muted)'
+          }">
+            <span class="dot ${p.status}"></span>
+            ${p.status === 'done' ? 'Completed' : p.status === 'current' ? 'In progress' : 'Upcoming'}
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  </div>
+`).join("");
+
+document.querySelector("#completed-table tbody").innerHTML = completed.map(p => `
+  <tr>
+    <td>${p.n}</td>
+    <td>${p.name}</td>
+    <td>${p.finished || "—"}</td>
+    <td class="conf">${p.confidence ? p.confidence + "/5" : "—"}</td>
+    <td class="notes">${p.notes || ""}</td>
+  </tr>
+`).join("") || `<tr><td colspan="5" class="notes">No projects completed yet.</td></tr>`;
+
+document.getElementById("shaky-list").innerHTML = DATA.shaky.length
+  ? DATA.shaky.map(s => `<li class="${s.startsWith('OPEN') ? 'flag' : ''}">${s}</li>`).join("")
+  : `<li>Nothing flagged right now.</li>`;
+
+document.getElementById("footer").textContent = `Last updated ${DATA.lastUpdated} — regenerated by your Claude mentor after each project/milestone.`;
+
+function setTheme(mode) {
+  document.documentElement.setAttribute("data-theme", mode);
+  document.getElementById("btn-light").classList.toggle("active", mode === "light");
+  document.getElementById("btn-dark").classList.toggle("active", mode === "dark");
+}
+setTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+</script>
+
+</body>
+</html>
