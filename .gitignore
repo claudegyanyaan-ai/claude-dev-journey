@@ -11,3 +11,8 @@ __pycache__/
 
 # Editor settings (personal, not shared)
 .vscode/
+
+# Scratch folder for files moved off disk from a mounted device session
+# (device_bash can't delete files directly, only move them here — safe to
+# empty this folder yourself any time)
+_to_delete/

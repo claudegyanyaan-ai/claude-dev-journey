@@ -4,7 +4,7 @@ Goal: Claude Certified Developer – Foundations, target date: Nov 2026 – Jan 
 
 ## Status
 - Current tier: 2 / 4
-- Current project: Project5 (not started, Multi-Tool CLI Assistant)
+- Current project: Project 6 (not started, Your First MCP Server)
 - Started: 2026-08-18
 
 ## Workflow note (2026-08-19)
@@ -18,6 +18,16 @@ typing less by hand. Tradeoff accepted knowingly: will need dedicated extra
 practice in the coding-heavy exam domains before actually booking the exam —
 flag this again as we approach Tier 3/4.
 
+## Workflow note (2026-08-22)
+Team plan changed again: Project 6 (Your First MCP Server) is now being
+built by the user directly, not handed off to a teammate — noted so future
+sessions don't assume the original 5/6/7 split still holds. Also cleaned up
+cross-platform repo hygiene while closing out Project 5: added a root
+`.gitattributes` (normalizes to LF) since Mac↔Windows checkouts were
+producing whole-file "modified" diffs that were pure line-ending noise, and
+committed `TEAM_WORKFLOW.md`, which had been written last session but never
+actually pushed.
+
 ## Completed Projects
 | # | Project | Finished | Confidence (1–5) | Notes |
 |---|---------|----------|-------------------|-------|
@@ -25,6 +35,7 @@ flag this again as we approach Tier 3/4.
 | 2 | CLI To-Do App | 2026-08-19 | 4/5 | Spec-writing for Claude Code, reviewing diffs in Manual mode, unittest with test isolation, git commit hygiene (amend). Full notes in `02-cli-todo-app/PROGRESS.md`. |
 | 3 | Structured Data Extractor | 2026-08-19 | 3/5 | System prompts vs. user messages, JSON output validation, error handling. Workflow pivot to hybrid approach happened mid-project. Full notes in `03-structured-data-extractor/PROGRESS.md`. |
 | 4 | Single-Tool Bot | 2026-08-20 | 3/5 | Tool_use loop (stop_reason, stateless second call, ** unpacking), first hybrid-workflow project. Folder named `Project4_Single_Tool_Bot` (deviation from numbering convention, intentional). Confirmed "2+2" triggers the calculator tool. Full notes in `Project4_Single_Tool_Bot/PROGRESS.md`. |
+| 5 | Multi-Tool CLI Assistant | 2026-08-21 | 4/5 | Two-tool agent loop (calculator + real Open-Meteo weather), retry logic, multi-block tool_use batching, live non-determinism/evals lesson. Caught a FIFA World Cup 2026 hallucination (bot has no date awareness). Full notes in `05-multi-tool-cli-assistant/PROGRESS.md`. |
 
 ## Concepts I still find shaky
 - Environment variable lookup order beyond a single simple `.env` file.
@@ -33,4 +44,4 @@ flag this again as we approach Tier 3/4.
 - Deeper coding/API fluency generally lighter going forward — will need dedicated review before the exam.
 
 ## Next session plan
-- Kick off Tier 2, Project 5: Multi-Tool CLI Assistant (several tools, Claude choosing which to use, retries/error handling, agent loop concept) — continuing the hybrid workflow.
+- Kick off Tier 2, Project 6: Your First MCP Server (building it yourself this time — not handed to a teammate), continuing the hybrid workflow.

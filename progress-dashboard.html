@@ -199,8 +199,8 @@
 <script>
 // ---- DATA: your mentor updates this block after each project/milestone ----
 const DATA = {
-  lastUpdated: "2026-08-20",
-  // Project 4 "2+2" open item resolved: user confirmed tool_use triggered.
+  lastUpdated: "2026-08-22",
+  // Project 5 done: two-tool agent loop, retries, evals lesson. Project 6 now user-built (not handed to teammate).
   tiers: [
     {
       name: "Tier 1 — Foundations",
@@ -218,8 +218,9 @@ const DATA = {
       projects: [
         { n: 4, name: "Single-Tool Bot", domain: "Tool use", status: "done", finished: "2026-08-20", confidence: 3,
           notes: "tool_use loop, stop_reason, stateless API, ** unpacking. First hybrid-workflow project (folder: Project4_Single_Tool_Bot). Confirmed \"2+2\" triggers the calculator tool." },
-        { n: 5, name: "Multi-Tool CLI Assistant", domain: "Tool use, agent basics", status: "current" },
-        { n: 6, name: "Your First MCP Server", domain: "MCP", status: "upcoming" },
+        { n: 5, name: "Multi-Tool CLI Assistant", domain: "Tool use, agent basics", status: "done", finished: "2026-08-21", confidence: 4,
+          notes: "Two-tool agent loop (calculator + real Open-Meteo weather), retry logic, multi-block tool_use batching. Live non-determinism/evals lesson. Caught a FIFA World Cup 2026 hallucination." },
+        { n: 6, name: "Your First MCP Server", domain: "MCP", status: "current" },
         { n: 7, name: "Claude Code Extensibility Lab", domain: "Claude Code workflows", status: "upcoming" },
       ]
     },
