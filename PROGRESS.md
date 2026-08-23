@@ -59,6 +59,24 @@ Consequences, applied immediately:
 - `progress-dashboard.html` goal subtitle and an obsolete "review before
   the exam" line in the shaky-concepts list updated to match.
 
+## Workflow note (2026-08-23b) — wove "Claude Code in Action" concepts into Projects 7-15
+Reviewed Anthropic's live "Claude Code in Action" course
+(anthropic.skilljar.com/claude-code-in-action) — distinct from the
+similarly-titled Coursera listing, which is actually the beginner
+"Claude Code 101" content already completed. It covers 9 concepts for
+running longer, less-supervised, team-wide Claude Code workflows:
+steering long sessions (Plan Mode, directed compaction, the rewind menu),
+a CLAUDE.md that's actually followed, verification skills, permission
+modes, hooks, routines & headless mode, GitHub Actions & code review,
+verifying unsupervised runs, and plugins.
+Decision (confirmed via AskUserQuestion): don't add a separate track for
+this. Weave each concept into whichever of Projects 7-15 is the natural
+fit instead, and strip the course's own exam-relevance framing, consistent
+with the 2026-08-23 pivot away from the certification goal. The 3-person
+team/shared-GitHub-repo setup is still current (Project 6 solo was a
+one-off). Full mapping is in `PLAN.md` PART 3's new "Also covers" column;
+three checklist items were also added to PART 6.
+
 ## Completed Projects
 | # | Project | Finished | Confidence (1–5) | Notes |
 |---|---------|----------|-------------------|-------|
