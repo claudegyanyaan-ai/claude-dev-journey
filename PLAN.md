@@ -4,45 +4,53 @@ Part 1 (the mentor system prompt) lives in `CLAUDE.md` in this same folder
 so Claude Code loads it automatically every session. This file holds the
 rest of the plan for reference.
 
+**2026-08-23 note:** This plan originally targeted Anthropic's Claude
+Certified Developer – Foundations exam. That target was deliberately
+dropped (see `PROGRESS.md`'s 2026-08-23 workflow note) — the actual goal
+now is broad, practical literacy in directing Claude to build real
+projects, not deep hands-on coding fluency or a formal certification. The
+project ladder below is kept largely as-is, because it's still a sensible
+sequence for building that literacy one concept at a time — but the
+"cert domain" framing, the readiness checklist, and the exam-timeline
+language have been removed or reworded throughout.
+
 ---
 ## PART 2 — WHY THIS APPROACH
 
-Anthropic's Claude Certified Developer – Foundations exam is built for
-engineers who ship on Claude — it tests the Claude API, custom tool use,
-MCP, agent development, and Claude Code workflows in realistic, applied
-scenarios, not trivia. That means the highest-leverage prep is exactly
-what this document sets up: a stack of small, real, increasingly complex
-builds, each one deliberately exercising one exam domain, with you doing
-the typing and Claude doing the coaching. Treat the certification as a
-lagging indicator — if you can build and explain all 15 projects unaided,
-the exam takes care of itself. (Exact exam fees, format, and domain
-weighting can change — confirm current details on Anthropic Academy / the
-Claude Partner Network before you register.)
+The highest-leverage way to build real literacy in directing Claude for
+software projects is a stack of small, real, increasingly complex builds
+— each one deliberately exercising one concept area (the Claude API,
+custom tool use, MCP, agent development, Claude Code workflows,
+deployment) — with Claude Code doing most of the actual typing and this
+mentor doing the coaching, and you focused on understanding *what* got
+built, *why* it's shaped that way, and how the pieces connect. The measure
+of success is being able to explain and reason about each project
+afterward, not being able to reproduce its code from memory.
 
 ---
 ## PART 3 — THE 15-PROJECT LADDER
 
 Each tier deliberately layers on the previous one. Don't skip tiers even
 if a project looks easy — the folder/workflow habits matter as much as
-the code.
+the concepts.
 
 ### Tier 1 — Foundations (Projects 1–3)
-| # | Project | Focus | Cert domain |
+| # | Project | Focus | Concept area |
 |---|---------|-------|-------------|
 | 1 | Hello, Claude Code | Project scaffolding, .env + API key handling, first script calling the Claude API from VS Code via Claude Code, git init | Claude API basics |
 | 2 | CLI To-Do App | Writing clear specs for Claude Code, iterative refinement, basic file I/O, argument parsing, testing by hand | Dev workflow / Claude Code fluency |
 | 3 | Structured Data Extractor | Turning messy text into clean JSON via the API, system prompts, output validation, error handling | Structured outputs, prompt design |
 
 ### Tier 2 — Tool Use & MCP (Projects 4–7)
-| # | Project | Focus | Cert domain |
+| # | Project | Focus | Concept area |
 |---|---------|-------|-------------|
 | 4 | Single-Tool Bot | One custom tool (e.g. a calculator or unit converter), JSON schema design, the tool_use → tool_result loop | Tool use |
 | 5 | Multi-Tool CLI Assistant | Several tools, tool routing/selection, retries and error handling, agent loop concept | Tool use, agent basics |
 | 6 | Your First MCP Server | Build a small MCP server (2–3 tools) with the MCP SDK, connect it into Claude Code/Claude Desktop | MCP |
-| 7 | Claude Code Extensibility Lab | Custom subagents, slash commands, and hooks inside Claude Code itself (.claude/agents, .claude/hooks, CLAUDE.md conventions) | Claude Code workflows (directly exam-relevant) |
+| 7 | Claude Code Extensibility Lab | Custom subagents, slash commands, and hooks inside Claude Code itself (.claude/agents, .claude/hooks, CLAUDE.md conventions) | Claude Code workflows |
 
 ### Tier 3 — Production-Grade Agents (Projects 8–11)
-| # | Project | Focus | Cert domain |
+| # | Project | Focus | Concept area |
 |---|---------|-------|-------------|
 | 8 | RAG Docs Assistant | Chunking, retrieval, citations, grounding answers in your own documents | Agent development |
 | 9 | Guardrailed Automation Agent | An agent that takes real actions with permission boundaries, human-in-the-loop confirmation, safe failure behavior | Security & safe agent design |
@@ -50,7 +58,7 @@ the code.
 | 11 | Eval & Observability Harness | Test cases, scoring, logging/tracing for one of your earlier agents; iterate on prompts using eval results | Evaluation & optimization |
 
 ### Tier 4 — Capstone (Projects 12–15)
-| # | Project | Focus | Cert domain |
+| # | Project | Focus | Concept area |
 |---|---------|-------|-------------|
 | 12 | Full-Stack Claude App | Small backend (FastAPI/Flask or Node/Express) + minimal frontend, using the API + one MCP tool + basic auth | Applied integration |
 | 13 | Ship It | Containerize (Docker), deploy to a real host, manage secrets/env vars, watch cost/rate limits | Deployment, cost/model optimization |
@@ -63,7 +71,7 @@ the code.
 Have Claude follow this shape for every single project — ask it to
 restate this checklist at the start of a project if it drifts:
 
-1. Objective (1 sentence) + cert domain it maps to.
+1. Objective (1 sentence) + the broad concept area it builds toward.
 2. Pre-flight check — confirm what you already know vs. what's new before
    starting.
 3. Folder/file scaffold, explained before creation, e.g. for Project 2:
@@ -75,14 +83,17 @@ restate this checklist at the start of a project if it drifts:
 ├── src/
 │   └── main.py          # entry point
 ├── tests/
-│   └── test_main.py     # you write at least one test yourself
+│   └── test_main.py     # covers the core behavior
 └── PROGRESS.md          # what you learned, linked from the root tracker
 ```
 
-4. Build loop — small steps, you type, Claude coaches, one step at a
-   time.
-5. Checkpoint quiz (3–5 questions) before moving on.
-6. Debrief — what this taught you, common pitfalls, exam relevance.
+4. Build loop — small steps; Claude Code writes, you review the diff and
+   test it, every non-obvious line gets explained, one step at a time.
+5. A short conceptual close-out check (a few questions about the shape
+   and reasoning of what got built, not line-by-line code tracing) before
+   moving on.
+6. Debrief — what this taught you, common pitfalls, how it connects to
+   the bigger picture.
 7. Git commit with a clear message; update the root PROGRESS.md.
 
 ---
@@ -93,7 +104,7 @@ template it was seeded from:
 
 ```
 # Claude Developer Journey — Progress
-Goal: Claude Certified Developer – Foundations, target date: <fill in>
+Goal: broad, practical literacy directing Claude to build real projects
 ## Status
 - Current tier: 1 / 4
 - Current project: 01-hello-claude-code
@@ -109,38 +120,44 @@ Goal: Claude Certified Developer – Foundations, target date: <fill in>
 ```
 
 ---
-## PART 6 — CERTIFICATION READINESS CHECKLIST
+## PART 6 — BROAD LITERACY CHECKLIST
 
-Before booking the exam, you should be able to do all of the following
-without Claude's help, only from memory + your own past projects:
+A lighter-weight replacement for the old exam-readiness checklist — a
+sense-check of whether the concepts are actually landing, not a
+memorization bar. You should be able to talk through each of these in
+your own words, using your own past projects as examples — no need to
+reproduce code from memory:
 
 - [ ] Explain the Claude API request/response cycle and system vs. user
       vs. assistant roles
-- [ ] Design a tool's JSON schema and walk through a full
-      tool_use → tool_result loop
+- [ ] Explain what a tool's JSON schema is for, and walk through the
+      shape of a tool_use → tool_result loop
 - [ ] Explain what MCP is, and the difference between an MCP tool,
       resource, and prompt
-- [ ] Build and connect a minimal MCP server from scratch
+- [ ] Explain what your MCP server (Project 6) does and how a client
+      connects to and uses it
 - [ ] Explain Claude Code's subagents, hooks, and slash commands, and
-      when to use each
+      when you'd reach for each
 - [ ] Describe at least two prompt-injection / security risks and how
-      you mitigated them in Project 9 or 14
-- [ ] Explain how you evaluated and improved an agent's behavior in
-      Project 11
-- [ ] Walk someone else through deploying your Project 13 app, including
-      secrets handling
+      an agent could guard against them
+- [ ] Explain, in broad strokes, how you'd evaluate whether an agent's
+      behavior is actually good
+- [ ] Walk someone else through what it'd take to deploy one of your
+      projects, including secrets handling
 
-If any box is shaky, that's your next study session — not a new project.
+If something here feels shaky, that's worth a conversation, not
+necessarily a whole new project.
 
 ---
 ## PART 7 — GROUND RULES (things to watch for and correct if Claude drifts)
 
-- If Claude starts writing entire files for you without explanation,
-  stop it and ask for the step-by-step version.
-- If a project feels too easy, say so — ask to compress the tier rather
-  than silently coasting.
-- If you're falling behind the 3–5 month timeline, ask Claude for an
-  honest re-plan rather than pushing through confused.
-- Always confirm current exam cost, format, and domain weighting
-  directly on Anthropic Academy before registering — certification
-  programs evolve.
+- If Claude hands you a finished file with no explanation of what
+  matters in it, stop it and ask for the walkthrough.
+- If a project feels too easy or too slow, say so — ask to adjust pace
+  rather than silently coasting or grinding.
+- If exam-prep framing (cert domains, readiness checklists, "fails the
+  exam" language) creeps back in anywhere, flag it — that goal was
+  deliberately dropped on 2026-08-23.
+- If you want to type a piece of code yourself for the practice on any
+  given project, just say so — the "Claude writes by default" rule is a
+  default, not a restriction.

@@ -169,7 +169,7 @@
 <div class="viz-root">
   <header>
     <h1>Claude Developer Journey</h1>
-    <p class="goal">Goal: <b>Claude Certified Developer &ndash; Foundations</b> &middot; Target: Nov 2026&ndash;Jan 2027 &middot; Started 2026-08-18</p>
+    <p class="goal">Goal: <b>broad, practical literacy directing Claude to build real projects</b> &middot; Started 2026-08-18</p>
     <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
     <div class="progress-label"><span id="progress-text"></span><span id="progress-pct"></span></div>
   </header>
@@ -199,8 +199,8 @@
 <script>
 // ---- DATA: your mentor updates this block after each project/milestone ----
 const DATA = {
-  lastUpdated: "2026-08-22",
-  // Project 5 done: two-tool agent loop, retries, evals lesson. Project 6 now user-built (not handed to teammate).
+  lastUpdated: "2026-08-23",
+  // Certification target dropped 2026-08-23 (see PROGRESS.md); goal is now broad literacy, not exam prep. Project 6 done.
   tiers: [
     {
       name: "Tier 1 — Foundations",
@@ -220,8 +220,9 @@ const DATA = {
           notes: "tool_use loop, stop_reason, stateless API, ** unpacking. First hybrid-workflow project (folder: Project4_Single_Tool_Bot). Confirmed \"2+2\" triggers the calculator tool." },
         { n: 5, name: "Multi-Tool CLI Assistant", domain: "Tool use, agent basics", status: "done", finished: "2026-08-21", confidence: 4,
           notes: "Two-tool agent loop (calculator + real Open-Meteo weather), retry logic, multi-block tool_use batching. Live non-determinism/evals lesson. Caught a FIFA World Cup 2026 hallucination." },
-        { n: 6, name: "Your First MCP Server", domain: "MCP", status: "current" },
-        { n: 7, name: "Claude Code Extensibility Lab", domain: "Claude Code workflows", status: "upcoming" },
+        { n: 6, name: "Your First MCP Server", domain: "MCP", status: "done", finished: "2026-08-22", confidence: 4,
+          notes: "Real MCP server (dictionary: English defs + English\u2192Hindi), mcp[cli], @mcp.tool(), stdio, verified via MCP Inspector. Hit and fixed a real SDK gap (FastMCP\u2192MCPServer rename). This is also where the certification target was dropped in favor of broad literacy." },
+        { n: 7, name: "Claude Code Extensibility Lab", domain: "Claude Code workflows", status: "current" },
       ]
     },
     {
@@ -246,7 +247,7 @@ const DATA = {
   shaky: [
     "Environment variable lookup order beyond a single simple .env file.",
     "Full range of Claude API error types beyond 400 (credit) / 401 (auth) — e.g. rate limits, overloaded errors.",
-    "Deeper coding/API fluency generally lighter going forward — will need dedicated review before the exam."
+    "Git commit hygiene — running git status before committing (mostly fixed, keep watching)."
   ]
 };
 // -----------------------------------------------------------------------
