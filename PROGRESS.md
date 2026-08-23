@@ -3,8 +3,8 @@
 Goal: broad, practical literacy in directing Claude to build real projects — understanding what gets built, why, and how the pieces fit together. (Revised 2026-08-23 — see workflow note below. Originally aimed at Anthropic's Claude Certified Developer – Foundations exam; that target was deliberately dropped.)
 
 ## Status
-- Current tier: 2 / 4
-- Current project: Project 7 (not started, Claude Code Extensibility Lab)
+- Current tier: 3 / 4
+- Current project: Project 8 (not started, RAG Docs Assistant)
 - Started: 2026-08-18
 
 ## Workflow note (2026-08-19)
@@ -86,6 +86,7 @@ three checklist items were also added to PART 6.
 | 4 | Single-Tool Bot | 2026-08-20 | 3/5 | Tool_use loop (stop_reason, stateless second call, ** unpacking), first hybrid-workflow project. Folder named `Project4_Single_Tool_Bot` (deviation from numbering convention, intentional). Confirmed "2+2" triggers the calculator tool. Full notes in `Project4_Single_Tool_Bot/PROGRESS.md`. |
 | 5 | Multi-Tool CLI Assistant | 2026-08-21 | 4/5 | Two-tool agent loop (calculator + real Open-Meteo weather), retry logic, multi-block tool_use batching, live non-determinism/evals lesson. Caught a FIFA World Cup 2026 hallucination (bot has no date awareness). Full notes in `05-multi-tool-cli-assistant/PROGRESS.md`. |
 | 6 | Your First MCP Server | 2026-08-22 | 4/5 | Real MCP server (dictionary: English definitions + English→Hindi translation) via `mcp[cli]`, `@mcp.tool()` decorators, stdio transport, verified end-to-end via the MCP Inspector. First project built fully Claude-writes (workflow switched mid-project). Hit and fixed a real SDK version gap (`FastMCP` renamed `MCPServer` in `mcp==2.0.0`). Extensive follow-up Q&A on MCP mechanics (client/server model, connection handshake, multi-tool pooling, why no API key, what `mcp dev` does) before closing out — this project is also where the certification target got dropped (see workflow note above). Full notes in `06-your-first-mcp-server/PROGRESS.md`. |
+| 7 | Claude Code Extensibility Lab | 2026-08-23 | 4/5 | Three repo-root `.claude/` customizations active for all future projects: `code-explainer` subagent (read-only, least-privilege tool scoping), `/update-logs` slash command (`disable-model-invocation` for a file-writing command), and a fail-open `PostToolUse` push-reminder hook (`matcher` + `if` layered filtering, never auto-pushes on this shared repo). Deliverable lives outside its own project folder by design — first project whose value is entirely reuse across the rest of the ladder. Real discovery mid-build: a new subagent/command/hook is invisible to the session that created it (Claude Code reads `.claude/` once, at startup) — required a session restart to verify any of the three actually worked. Full notes in `07-claude-code-extensibility-lab/PROGRESS.md`. |
 
 ## Concepts I still find shaky
 - Environment variable lookup order beyond a single simple `.env` file.
@@ -93,4 +94,4 @@ three checklist items were also added to PART 6.
 - Git commit hygiene — running `git status` before committing (mostly fixed in Project 4, keep watching).
 
 ## Next session plan
-- Kick off Tier 2, Project 7: Claude Code Extensibility Lab (custom subagents, slash commands, hooks) — using the new default workflow (Claude writes, conceptual close-out).
+- Kick off Tier 3, Project 8: RAG Docs Assistant (chunking, retrieval, citations, grounding answers in your own documents) — using the new default workflow (Claude writes, conceptual close-out). Also covers: packaging the retrieval procedure as a reusable skill.
