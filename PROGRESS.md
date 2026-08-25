@@ -4,7 +4,7 @@ Goal: broad, practical literacy in directing Claude to build real projects — u
 
 ## Status
 - Current tier: 3 / 4
-- Current project: Project 8 (not started, RAG Docs Assistant)
+- Current project: Project 9 (not started, Guardrailed Automation Agent)
 - Started: 2026-08-18
 
 ## Workflow note (2026-08-19)
@@ -77,6 +77,21 @@ team/shared-GitHub-repo setup is still current (Project 6 solo was a
 one-off). Full mapping is in `PLAN.md` PART 3's new "Also covers" column;
 three checklist items were also added to PART 6.
 
+## Workflow note (2026-08-25) — Project 8's OCR pivot: don't trust "it ran" as "it worked"
+Project 8 (RAG Docs Assistant) hit a real, unplanned detour: the source
+PDF's text was supposed to be plainly `pypdf`-extractable per the spec, but
+`pypdf` silently recovered under 10% of the document's actual content
+(confirmed independently with two more extraction libraries, then by
+literally rendering a page and looking at it — the text was embedded as
+vector graphics, not real characters). No error was ever raised anywhere
+in that chain; the bad extraction looked completely successful. Pivoted to
+local OCR (PyMuPDF + Tesseract) after the user explicitly declined a paid
+Claude-vision-transcription alternative once the cost tradeoff was
+concrete. Worth carrying forward as a standing instinct, not just a
+Project-8-specific fix: **a tool completing without an error says nothing
+about whether its output is correct** — cross-check against ground truth
+early, especially for anything parsing/extracting real-world files.
+
 ## Completed Projects
 | # | Project | Finished | Confidence (1–5) | Notes |
 |---|---------|----------|-------------------|-------|
@@ -87,6 +102,7 @@ three checklist items were also added to PART 6.
 | 5 | Multi-Tool CLI Assistant | 2026-08-21 | 4/5 | Two-tool agent loop (calculator + real Open-Meteo weather), retry logic, multi-block tool_use batching, live non-determinism/evals lesson. Caught a FIFA World Cup 2026 hallucination (bot has no date awareness). Full notes in `05-multi-tool-cli-assistant/PROGRESS.md`. |
 | 6 | Your First MCP Server | 2026-08-22 | 4/5 | Real MCP server (dictionary: English definitions + English→Hindi translation) via `mcp[cli]`, `@mcp.tool()` decorators, stdio transport, verified end-to-end via the MCP Inspector. First project built fully Claude-writes (workflow switched mid-project). Hit and fixed a real SDK version gap (`FastMCP` renamed `MCPServer` in `mcp==2.0.0`). Extensive follow-up Q&A on MCP mechanics (client/server model, connection handshake, multi-tool pooling, why no API key, what `mcp dev` does) before closing out — this project is also where the certification target got dropped (see workflow note above). Full notes in `06-your-first-mcp-server/PROGRESS.md`. |
 | 7 | Claude Code Extensibility Lab | 2026-08-23 | 4/5 | Three repo-root `.claude/` customizations active for all future projects: `code-explainer` subagent (read-only, least-privilege tool scoping), `/update-logs` slash command (`disable-model-invocation` for a file-writing command), and a fail-open `PostToolUse` push-reminder hook (`matcher` + `if` layered filtering, never auto-pushes on this shared repo). Deliverable lives outside its own project folder by design — first project whose value is entirely reuse across the rest of the ladder. Real discovery mid-build: a new subagent/command/hook is invisible to the session that created it (Claude Code reads `.claude/` once, at startup) — required a session restart to verify any of the three actually worked. Full notes in `07-claude-code-extensibility-lab/PROGRESS.md`. |
+| 8 | RAG Docs Assistant | 2026-08-25 | conceptual close-out done by the user separately (not recorded in this session) | Full local RAG pipeline over `docs/osnr.pdf`: heading-based chunking, local `sentence-transformers` embeddings, in-memory cosine-similarity retrieval, grounded+cited answers via Claude Haiku 4.5. Major unplanned detour: `pypdf` recovered under 10% of the document's real text (embedded as vector graphics, not selectable characters) — pivoted to local Tesseract OCR after cross-checking three extraction libraries and rendering a page to confirm visually; recovered ~11x more text. `chunk.py`'s 14 synthetic unit tests all passed yet still missed two real bugs only found by running against the actual OCR'd document (a regex collision between two different OCR artifacts, and a duplicated-heading variant that also duplicated a body line). All four of the spec's manual grounding/citation verification checks passed, including a word-for-word match against one of the document's own Self-Assessment Questions. Closed out with a project-scoped Claude Code skill (`ask-osnr-docs`) — drafted by the user independently, reviewed and fixed (path, stale facts, missing Tesseract prerequisite). Full notes in `08-rag-docs-assistant/PROGRESS.md`. |
 
 ## Concepts I still find shaky
 - Environment variable lookup order beyond a single simple `.env` file.
@@ -94,4 +110,4 @@ three checklist items were also added to PART 6.
 - Git commit hygiene — running `git status` before committing (mostly fixed in Project 4, keep watching).
 
 ## Next session plan
-- Kick off Tier 3, Project 8: RAG Docs Assistant (chunking, retrieval, citations, grounding answers in your own documents) — using the new default workflow (Claude writes, conceptual close-out). Also covers: packaging the retrieval procedure as a reusable skill.
+- Kick off Project 9: Guardrailed Automation Agent (an agent that takes real actions with permission boundaries, human-in-the-loop confirmation, safe failure behavior) — concept area: security & safe agent design. Also covers: permission modes in depth, and calibrating how much you verify Claude's output based on how little you supervised the run.
