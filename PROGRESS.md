@@ -4,7 +4,7 @@ Goal: broad, practical literacy in directing Claude to build real projects — u
 
 ## Status
 - Current tier: 3 / 4
-- Current project: Project 9 (not started, Guardrailed Automation Agent)
+- Current project: Project 10 (not started, Multi-Agent Orchestration)
 - Started: 2026-08-18
 
 ## Workflow note (2026-08-19)
@@ -92,6 +92,24 @@ Project-8-specific fix: **a tool completing without an error says nothing
 about whether its output is correct** — cross-check against ground truth
 early, especially for anything parsing/extracting real-world files.
 
+## Workflow note (2026-09-06) — an auth error that wasn't one, and a bug only Windows could show
+Project 9 (Guardrailed Automation Agent) surfaced two lessons worth
+carrying forward, both only visible because of testing against a real
+environment rather than trusting a green run. First: a
+`401 Unauthorized` from Anthropic's API isn't proof a key is bad — one
+sandboxed shell used mid-build had its own network proxy silently
+intercepting requests to `api.anthropic.com` and returning a plain-text
+401 of its own before the request ever reached Anthropic. The actual tell
+was the error's *shape*, not its status code: Anthropic's real auth
+errors come back as JSON with a `type: authentication_error` body; this
+didn't. Second: `store.py`'s Excel logic passed every test in the (Linux)
+build environment, then failed 5 of them the moment the user ran the same
+suite on their own Windows machine — `openpyxl`'s `read_only=True` mode
+leaves a zip file handle open until closed explicitly, which Windows
+enforces during cleanup and Linux doesn't. Neither issue was catchable
+without running on the real target environment; "tests pass" and "tests
+pass where this will actually run" are not the same claim.
+
 ## Completed Projects
 | # | Project | Finished | Confidence (1–5) | Notes |
 |---|---------|----------|-------------------|-------|
@@ -103,6 +121,7 @@ early, especially for anything parsing/extracting real-world files.
 | 6 | Your First MCP Server | 2026-08-22 | 4/5 | Real MCP server (dictionary: English definitions + English→Hindi translation) via `mcp[cli]`, `@mcp.tool()` decorators, stdio transport, verified end-to-end via the MCP Inspector. First project built fully Claude-writes (workflow switched mid-project). Hit and fixed a real SDK version gap (`FastMCP` renamed `MCPServer` in `mcp==2.0.0`). Extensive follow-up Q&A on MCP mechanics (client/server model, connection handshake, multi-tool pooling, why no API key, what `mcp dev` does) before closing out — this project is also where the certification target got dropped (see workflow note above). Full notes in `06-your-first-mcp-server/PROGRESS.md`. |
 | 7 | Claude Code Extensibility Lab | 2026-08-23 | 4/5 | Three repo-root `.claude/` customizations active for all future projects: `code-explainer` subagent (read-only, least-privilege tool scoping), `/update-logs` slash command (`disable-model-invocation` for a file-writing command), and a fail-open `PostToolUse` push-reminder hook (`matcher` + `if` layered filtering, never auto-pushes on this shared repo). Deliverable lives outside its own project folder by design — first project whose value is entirely reuse across the rest of the ladder. Real discovery mid-build: a new subagent/command/hook is invisible to the session that created it (Claude Code reads `.claude/` once, at startup) — required a session restart to verify any of the three actually worked. Full notes in `07-claude-code-extensibility-lab/PROGRESS.md`. |
 | 8 | RAG Docs Assistant | 2026-08-25 | conceptual close-out done by the user separately (not recorded in this session) | Full local RAG pipeline over `docs/osnr.pdf`: heading-based chunking, local `sentence-transformers` embeddings, in-memory cosine-similarity retrieval, grounded+cited answers via Claude Haiku 4.5. Major unplanned detour: `pypdf` recovered under 10% of the document's real text (embedded as vector graphics, not selectable characters) — pivoted to local Tesseract OCR after cross-checking three extraction libraries and rendering a page to confirm visually; recovered ~11x more text. `chunk.py`'s 14 synthetic unit tests all passed yet still missed two real bugs only found by running against the actual OCR'd document (a regex collision between two different OCR artifacts, and a duplicated-heading variant that also duplicated a body line). All four of the spec's manual grounding/citation verification checks passed, including a word-for-word match against one of the document's own Self-Assessment Questions. Closed out with a project-scoped Claude Code skill (`ask-osnr-docs`) — drafted by the user independently, reviewed and fixed (path, stale facts, missing Tesseract prerequisite). Full notes in `08-rag-docs-assistant/PROGRESS.md`. |
+| 9 | Guardrailed Automation Agent | 2026-09-06 | 3.5/5 | Full pipeline: `extract.py` (Claude-backed, verbatim-only field extraction — never guesses a missing value) → `guardrail.py` (pure auto-write/needs-confirmation logic: completeness, age plausibility, email shape, case-insensitive duplicate check) → `store.py` (safe append-only Excel read/write) → `agent.py` (the CLI tying it together, pausing for a real `[y/N]` human decision whenever guardrail says to). 39 unit tests across the four modules. Two real bugs caught only by testing against the real environment, not the sandbox that built it: a network proxy silently faking a `401 Unauthorized` before requests reached Anthropic, and a Windows-only `openpyxl` file-lock invisible on Linux (see workflow note above for both). Full notes in `09-guardrailed-automation-agent/PROGRESS.md`. |
 
 ## Concepts I still find shaky
 - Environment variable lookup order beyond a single simple `.env` file.
@@ -110,4 +129,4 @@ early, especially for anything parsing/extracting real-world files.
 - Git commit hygiene — running `git status` before committing (mostly fixed in Project 4, keep watching).
 
 ## Next session plan
-- Kick off Project 9: Guardrailed Automation Agent (an agent that takes real actions with permission boundaries, human-in-the-loop confirmation, safe failure behavior) — concept area: security & safe agent design. Also covers: permission modes in depth, and calibrating how much you verify Claude's output based on how little you supervised the run.
+- Kick off Project 10: Multi-Agent Orchestration (orchestrator + subagent pattern, session/context management across agents) — concept area: advanced agent development. Also covers: Routines (scheduling prompts on Anthropic's own infrastructure) and headless mode (running Claude Code without the interactive UI, wired into a script/pipeline).

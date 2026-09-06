@@ -199,8 +199,8 @@
 <script>
 // ---- DATA: your mentor updates this block after each project/milestone ----
 const DATA = {
-  lastUpdated: "2026-08-25",
-  // Certification target dropped 2026-08-23 (see PROGRESS.md); goal is now broad literacy, not exam prep. Project 8 done.
+  lastUpdated: "2026-09-06",
+  // Certification target dropped 2026-08-23 (see PROGRESS.md); goal is now broad literacy, not exam prep. Project 9 done.
   tiers: [
     {
       name: "Tier 1 — Foundations",
@@ -221,7 +221,7 @@ const DATA = {
         { n: 5, name: "Multi-Tool CLI Assistant", domain: "Tool use, agent basics", status: "done", finished: "2026-08-21", confidence: 4,
           notes: "Two-tool agent loop (calculator + real Open-Meteo weather), retry logic, multi-block tool_use batching. Live non-determinism/evals lesson. Caught a FIFA World Cup 2026 hallucination." },
         { n: 6, name: "Your First MCP Server", domain: "MCP", status: "done", finished: "2026-08-22", confidence: 4,
-          notes: "Real MCP server (dictionary: English defs + English\u2192Hindi), mcp[cli], @mcp.tool(), stdio, verified via MCP Inspector. Hit and fixed a real SDK gap (FastMCP\u2192MCPServer rename). This is also where the certification target was dropped in favor of broad literacy." },
+          notes: "Real MCP server (dictionary: English defs + English→Hindi), mcp[cli], @mcp.tool(), stdio, verified via MCP Inspector. Hit and fixed a real SDK gap (FastMCP→MCPServer rename). This is also where the certification target was dropped in favor of broad literacy." },
         { n: 7, name: "Claude Code Extensibility Lab", domain: "Claude Code workflows", status: "done", finished: "2026-08-23", confidence: 4,
           notes: "Repo-root .claude/ customizations: code-explainer subagent, /update-logs slash command, fail-open push-reminder hook. Discovery: a new subagent/command/hook is invisible to the session that created it — needs a restart." },
       ]
@@ -231,8 +231,9 @@ const DATA = {
       projects: [
         { n: 8, name: "RAG Docs Assistant", domain: "Agent development", status: "done", finished: "2026-08-25", confidence: 4,
           notes: "Local RAG pipeline (OCR → heading-based chunking → local embeddings → in-memory retrieval → grounded+cited Claude Haiku 4.5 answers). Mid-project pivot: pypdf recovered under 10% of the source PDF's real text (embedded as vector graphics) — switched to local Tesseract OCR, recovered ~11x more. All 4 spec verification checks passed. Closed out with a project-scoped Claude Code skill." },
-        { n: 9, name: "Guardrailed Automation Agent", domain: "Security & safe agent design", status: "current" },
-        { n: 10, name: "Multi-Agent Orchestration", domain: "Advanced agent development", status: "upcoming" },
+        { n: 9, name: "Guardrailed Automation Agent", domain: "Security & safe agent design", status: "done", finished: "2026-09-06", confidence: 3.5,
+          notes: "Full pipeline: extract.py (Claude-backed, verbatim-only extraction) → guardrail.py (pure auto-write/needs-confirmation logic) → store.py (safe append-only Excel I/O) → agent.py (CLI, human [y/N] confirmation). 39 unit tests. Two real bugs only testing on the real environment caught: a network proxy faking a 401, and a Windows-only openpyxl file-lock invisible on Linux." },
+        { n: 10, name: "Multi-Agent Orchestration", domain: "Advanced agent development", status: "current" },
         { n: 11, name: "Eval & Observability Harness", domain: "Evaluation & optimization", status: "upcoming" },
       ]
     },
