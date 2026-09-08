@@ -4,7 +4,7 @@ Goal: broad, practical literacy in directing Claude to build real projects — u
 
 ## Status
 - Current tier: 3 / 4
-- Current project: Project 10 (not started, Multi-Agent Orchestration)
+- Current project: Project 10 (Multi-Agent Orchestration) — core pipeline, tests, and /ask-network slash command built and verified; conceptual close-out check, git commit, and PLAN.md's Routines/headless-mode items still pending
 - Started: 2026-08-18
 
 ## Workflow note (2026-08-19)
