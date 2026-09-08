@@ -1,12 +1,15 @@
 # Project 10 — Multi-Agent Orchestration — Progress Notes
 
-**Status:** core pipeline complete — `rag_core.py` → three domain
-subagents → `orchestrator.py` → `main.py` all built and verified end to
-end against all three real documents, plus a working `/ask-network` slash
-command and a passing 4-test unit suite. This project used a one-off
-"guide-only" workflow exception (scaffolding/guidance while the user wrote
-the code themselves) instead of the standing "Claude writes by default"
-workflow — see `chat-logs/2026-09-07_1330.md`.
+**Status:** CLOSED (2026-09-08), confidence 3/5 self-assessed — core
+pipeline complete: `rag_core.py` → three domain subagents →
+`orchestrator.py` → `main.py` all built and verified end to end against
+all three real documents, plus a working `/ask-network` slash command and
+a passing 4-test unit suite. The formal conceptual close-out check was
+skipped by request; the rating above is self-assessed rather than
+review-verified. This project used a one-off "guide-only" workflow
+exception (scaffolding/guidance while the user wrote the code themselves)
+instead of the standing "Claude writes by default" workflow — see
+`chat-logs/2026-09-07_1330.md`.
 
 ## What got built
 
@@ -86,14 +89,16 @@ workflow — see `chat-logs/2026-09-07_1330.md`.
 
 ## Open items
 
-- No conceptual close-out check done yet, so no confidence rating
-  recorded in the root `PROGRESS.md`'s Completed Projects table for this
-  project.
+- Conceptual close-out check was explicitly skipped by request; confidence
+  (3/5) is self-assessed rather than review-verified. Recorded in root
+  `PROGRESS.md`'s Completed Projects table.
 - No committed script builds the three indexes from scratch (see
   `README.md` Setup step 5) — currently a manual one-off.
-- Git commit + push still pending (covers `ask-network.md`, the
-  `requirements.txt` fix, and this README/PROGRESS write-up).
-- `PLAN.md`'s "also covers" items for this project — Routines/scheduled
-  prompts and headless mode — not yet reached.
+- `PLAN.md`'s "also covers" items for this project — Routines (scheduled
+  prompts) and headless mode — were explicitly skipped for this project,
+  not pursued. Could be picked up as a rep in a later project if desired.
+
+Git commit (`560ac40`) and push are done — covers `ask-network.md`, the
+`requirements.txt` fix, and this README/PROGRESS write-up.
 
 Full session transcripts: see `chat-logs/`.
