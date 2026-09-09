@@ -199,8 +199,8 @@
 <script>
 // ---- DATA: your mentor updates this block after each project/milestone ----
 const DATA = {
-  lastUpdated: "2026-09-06",
-  // Certification target dropped 2026-08-23 (see PROGRESS.md); goal is now broad literacy, not exam prep. Project 9 done.
+  lastUpdated: "2026-09-09",
+  // Certification target dropped 2026-08-23 (see PROGRESS.md); goal is now broad literacy, not exam prep. Tier 3 (Projects 8-11) complete.
   tiers: [
     {
       name: "Tier 1 — Foundations",
@@ -233,8 +233,10 @@ const DATA = {
           notes: "Local RAG pipeline (OCR → heading-based chunking → local embeddings → in-memory retrieval → grounded+cited Claude Haiku 4.5 answers). Mid-project pivot: pypdf recovered under 10% of the source PDF's real text (embedded as vector graphics) — switched to local Tesseract OCR, recovered ~11x more. All 4 spec verification checks passed. Closed out with a project-scoped Claude Code skill." },
         { n: 9, name: "Guardrailed Automation Agent", domain: "Security & safe agent design", status: "done", finished: "2026-09-06", confidence: 3.5,
           notes: "Full pipeline: extract.py (Claude-backed, verbatim-only extraction) → guardrail.py (pure auto-write/needs-confirmation logic) → store.py (safe append-only Excel I/O) → agent.py (CLI, human [y/N] confirmation). 39 unit tests. Two real bugs only testing on the real environment caught: a network proxy faking a 401, and a Windows-only openpyxl file-lock invisible on Linux." },
-        { n: 10, name: "Multi-Agent Orchestration", domain: "Advanced agent development", status: "current" },
-        { n: 11, name: "Eval & Observability Harness", domain: "Evaluation & optimization", status: "upcoming" },
+        { n: 10, name: "Multi-Agent Orchestration", domain: "Advanced agent development", status: "done", finished: "2026-09-08", confidence: 3,
+          notes: "Orchestrator/subagent pattern: rag_core.py (generalized from Project 8) → three domain subagents (dwdm_osnr, ethernet, ip) → orchestrator.py (Claude-based routing + full execution trace) → main.py. Real bugs: dwdm_osnr.pdf shared Project 8's vector-graphics-text problem; a chunk-boundary truncation fixed by widening the window (also improved another subagent as a side effect); a corrupted requirements.txt. Closed out 2026-09-09 with rebuild_indexes.py." },
+        { n: 11, name: "Eval & Observability Harness", domain: "Evaluation & optimization", status: "done", finished: "2026-09-09", confidence: 3.5,
+          notes: "15-case eval suite scoring the orchestrator's domain routing + answers, verified 15/15 from console output and the saved JSON report. Plus a PreToolUse hook gating git commit on a fresh eval run (blocks below 100% or if eval can't run). Real discovery: the hook only sees commits Claude Code's own agent makes, not ones typed directly into a terminal — narrower scope than a real git pre-commit hook; success-path still unverified pending a live Claude-Code-driven commit." },
       ]
     },
     {

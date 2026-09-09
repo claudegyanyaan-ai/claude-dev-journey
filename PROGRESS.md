@@ -3,8 +3,8 @@
 Goal: broad, practical literacy in directing Claude to build real projects — understanding what gets built, why, and how the pieces fit together. (Revised 2026-08-23 — see workflow note below. Originally aimed at Anthropic's Claude Certified Developer – Foundations exam; that target was deliberately dropped.)
 
 ## Status
-- Current tier: 3 / 4
-- Current project: Project 11 (not started, Eval & Observability Harness)
+- Current tier: 4 / 4
+- Current project: Project 12 (not started, Full-Stack Claude App)
 - Started: 2026-08-18
 
 ## Workflow note (2026-08-19)
@@ -110,6 +110,32 @@ enforces during cleanup and Linux doesn't. Neither issue was catchable
 without running on the real target environment; "tests pass" and "tests
 pass where this will actually run" are not the same claim.
 
+## Workflow note (2026-09-09) — a hook that looked wired up but never fired, and a stale git lock
+Project 11 (Eval & Observability Harness) surfaced two more "green doesn't
+mean working" lessons. First: after wiring a `PreToolUse` hook
+(`check-eval-before-commit.sh`) to gate `git commit` on a fresh eval run, a
+test commit went through instantly with no `Eval gate: ...` message at
+all — easy to misread as success. It wasn't: Claude Code's `PreToolUse`
+hooks only intercept tool calls Claude Code's own agent makes through its
+Bash tool; they have zero visibility into a `git commit` typed directly
+into a terminal by a human. That's a real, permanent scope limit, not a
+bug — a genuine git-level `.git/hooks/pre-commit` script would be needed to
+gate *every* commit regardless of who runs it. The hook's own logic (command
+filtering, venv-Python path resolution, fail-closed blocking when the eval
+can't run) was verified independently by feeding it simulated input
+directly; the success-path message (a real 15/15 run allowing the commit)
+is still unverified pending an actual Claude-Code-driven commit on the
+user's machine — flagged as an open item, not assumed to work.
+Second: three git commits in a row failed with `Unable to create
+'.git/index.lock': File exists` — traced to a genuinely stale lock file
+(timestamped over a day old, 0 bytes, from some earlier interrupted git
+process), confirmed safe to delete by checking its age before removing it.
+Also discovered mid-session: `.claude/` is deliberately write-protected
+from remote/device-bridge file delivery (a safety boundary against a
+session silently installing its own hooks) — the new hook script and
+`settings.json` had to be handed to the user as files and placed manually,
+same as any other privileged config change.
+
 ## Completed Projects
 | # | Project | Finished | Confidence (1–5) | Notes |
 |---|---------|----------|-------------------|-------|
@@ -122,12 +148,15 @@ pass where this will actually run" are not the same claim.
 | 7 | Claude Code Extensibility Lab | 2026-08-23 | 4/5 | Three repo-root `.claude/` customizations active for all future projects: `code-explainer` subagent (read-only, least-privilege tool scoping), `/update-logs` slash command (`disable-model-invocation` for a file-writing command), and a fail-open `PostToolUse` push-reminder hook (`matcher` + `if` layered filtering, never auto-pushes on this shared repo). Deliverable lives outside its own project folder by design — first project whose value is entirely reuse across the rest of the ladder. Real discovery mid-build: a new subagent/command/hook is invisible to the session that created it (Claude Code reads `.claude/` once, at startup) — required a session restart to verify any of the three actually worked. Full notes in `07-claude-code-extensibility-lab/PROGRESS.md`. |
 | 8 | RAG Docs Assistant | 2026-08-25 | conceptual close-out done by the user separately (not recorded in this session) | Full local RAG pipeline over `docs/osnr.pdf`: heading-based chunking, local `sentence-transformers` embeddings, in-memory cosine-similarity retrieval, grounded+cited answers via Claude Haiku 4.5. Major unplanned detour: `pypdf` recovered under 10% of the document's real text (embedded as vector graphics, not selectable characters) — pivoted to local Tesseract OCR after cross-checking three extraction libraries and rendering a page to confirm visually; recovered ~11x more text. `chunk.py`'s 14 synthetic unit tests all passed yet still missed two real bugs only found by running against the actual OCR'd document (a regex collision between two different OCR artifacts, and a duplicated-heading variant that also duplicated a body line). All four of the spec's manual grounding/citation verification checks passed, including a word-for-word match against one of the document's own Self-Assessment Questions. Closed out with a project-scoped Claude Code skill (`ask-osnr-docs`) — drafted by the user independently, reviewed and fixed (path, stale facts, missing Tesseract prerequisite). Full notes in `08-rag-docs-assistant/PROGRESS.md`. |
 | 9 | Guardrailed Automation Agent | 2026-09-06 | 3.5/5 | Full pipeline: `extract.py` (Claude-backed, verbatim-only field extraction — never guesses a missing value) → `guardrail.py` (pure auto-write/needs-confirmation logic: completeness, age plausibility, email shape, case-insensitive duplicate check) → `store.py` (safe append-only Excel read/write) → `agent.py` (the CLI tying it together, pausing for a real `[y/N]` human decision whenever guardrail says to). 39 unit tests across the four modules. Two real bugs caught only by testing against the real environment, not the sandbox that built it: a network proxy silently faking a `401 Unauthorized` before requests reached Anthropic, and a Windows-only `openpyxl` file-lock invisible on Linux (see workflow note above for both). Full notes in `09-guardrailed-automation-agent/PROGRESS.md`. |
-| 10 | Multi-Agent Orchestration | 2026-09-08 | 3/5 (self-assessed; formal conceptual close-out check skipped by request) | Orchestrator/subagent pattern: `rag_core.py` (OCR-or-plain extraction, structure-agnostic chunking, embedding, retrieval, grounded answering — generalized from Project 8 to serve three documents) → three domain subagents (`dwdm_osnr`, `ethernet`, `ip`), each its own index/system prompt → `orchestrator.py` (Claude-based domain classification + routing, with a full execution trace: domain, source PDF, exact pages referenced) → `main.py` (interactive loop, one isolated context per question). Real bugs caught: `dwdm_osnr.pdf` had the same vector-graphics-text problem as Project 8's PDF (confirmed byte-identical); a chunk-boundary truncation bug fixed by widening the chunk window (800/150 → 1200/300), which also improved another subagent's answers as a side effect; a corrupted `requirements.txt` (UTF-16 + stray shell-command lines). Also shipped a repo-root `/ask-network` slash command. 4 unit tests passing. This project's PLAN.md "also covers" items — Routines (scheduled prompts) and headless mode — were explicitly skipped, not pursued. Full notes in `10-multi-agent-orchestration/PROGRESS.md`. |
+| 10 | Multi-Agent Orchestration | 2026-09-08 | 3/5 (self-assessed; formal conceptual close-out check skipped by request) | Orchestrator/subagent pattern: `rag_core.py` (OCR-or-plain extraction, structure-agnostic chunking, embedding, retrieval, grounded answering — generalized from Project 8 to serve three documents) → three domain subagents (`dwdm_osnr`, `ethernet`, `ip`), each its own index/system prompt → `orchestrator.py` (Claude-based domain classification + routing, with a full execution trace: domain, source PDF, exact pages referenced) → `main.py` (interactive loop, one isolated context per question). Real bugs caught: `dwdm_osnr.pdf` had the same vector-graphics-text problem as Project 8's PDF (confirmed byte-identical); a chunk-boundary truncation bug fixed by widening the chunk window (800/150 → 1200/300), which also improved another subagent's answers as a side effect; a corrupted `requirements.txt` (UTF-16 + stray shell-command lines). Also shipped a repo-root `/ask-network` slash command. 4 unit tests passing. This project's PLAN.md "also covers" items — Routines (scheduled prompts) and headless mode — were explicitly skipped, not pursued. Closed out 2026-09-09 with `rebuild_indexes.py`, a scripted build for all three indexes (previously a manual one-off — see Project 11's row below). Full notes in `10-multi-agent-orchestration/PROGRESS.md`. |
+| 11 | Eval & Observability Harness | 2026-09-09 | 3.5/5 (self-assessed) | 15-case eval suite (`eval_cases.json` + `run_eval.py`) scoring the Project 10 orchestrator's domain routing and answer content, one case run at a time through `route()`, writing a timestamped JSON report per run — verified 15/15 both from console output and by reading the saved report back independently. Also built this project's "also covers" items: a `PreToolUse` Claude Code hook (`check-eval-before-commit.sh`) that reruns the full eval before allowing `git commit` and blocks (exit 2) below a 100% threshold or if the eval can't run at all — gating on a fresh real result instead of a self-report. Real discovery: the hook never fires for a `git commit` typed directly into a terminal, only for one Claude Code's own agent runs itself — a materially different (and narrower) scope than a real git-level `pre-commit` hook; the success-path message is still unverified pending a real Claude-Code-driven commit (see 2026-09-09 workflow note above). Also hit and fixed a genuinely stale `.git/index.lock` blocking all commits, and discovered `.claude/` is write-protected from remote file delivery by design. Three atomic commits: `rebuild_indexes.py` (Project 10 gap-closer), the eval harness itself, and the gating hook. Full session notes in `chat-logs/2026-09-09_1412.md`. |
 
 ## Concepts I still find shaky
 - Environment variable lookup order beyond a single simple `.env` file.
 - Full range of Claude API error types beyond 400 (credit) / 401 (auth) — e.g. rate limits, overloaded errors.
 - Git commit hygiene — running `git status` before committing (mostly fixed in Project 4, keep watching).
+- Claude Code hook scope — a `PreToolUse`/`PostToolUse` hook only sees tool calls Claude Code's own agent makes, never commands typed directly into a terminal. Needed a full explanation rather than landing on it independently during Project 11's close-out; revisit if it comes up again.
 
 ## Next session plan
-- Kick off Project 11: Eval & Observability Harness (test cases, scoring, logging/tracing for one of the earlier agents; iterate on prompts using eval results) — concept area: evaluation & optimization. Also covers: verifying unsupervised runs; gating on real test results with hooks rather than Claude's self-report.
+- Kick off Project 12: Full-Stack Claude App (small backend + minimal frontend, using the API + one MCP tool + basic auth) — concept area: applied integration. Also covers: GitHub Actions and automated PR/code review, usable directly on the team's shared repo.
+- Open item carried over from Project 11: the eval-gating hook's success path (a real 15/15 run allowing a commit through) hasn't been verified with an actual Claude-Code-driven commit yet — worth doing whenever convenient, not blocking Project 12.
