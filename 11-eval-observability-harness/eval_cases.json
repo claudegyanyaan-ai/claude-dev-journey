@@ -1,0 +1,19 @@
+[
+  {"id": "dwdm_01", "question": "What is noise figure in an EDFA?", "expected_domain": "dwdm_osnr", "must_contain": ["noise figure", "3 db"]},
+  {"id": "dwdm_02", "question": "What is the quantum-limited noise figure for an EDFA with complete population inversion?", "expected_domain": "dwdm_osnr", "must_contain": ["3 db"]},
+  {"id": "dwdm_03", "question": "What is the noise figure range for C-band EDFAs in practice?", "expected_domain": "dwdm_osnr", "must_contain": ["3.5", "5.5"]},
+  {"id": "dwdm_04", "question": "Which pump wavelength produces a lower noise figure in an EDFA's first stage?", "expected_domain": "dwdm_osnr", "must_contain": ["980"]},
+  {"id": "dwdm_05", "question": "What does OSNR stand for?", "expected_domain": "dwdm_osnr", "must_contain": ["signal", "noise"]},
+
+  {"id": "ethernet_01", "question": "What is the maximum cable length for 1000BASE-T?", "expected_domain": "ethernet", "must_contain": ["100"]},
+  {"id": "ethernet_02", "question": "What is full duplex in Ethernet?", "expected_domain": "ethernet", "must_contain": ["duplex"]},
+  {"id": "ethernet_03", "question": "What is the difference between a hub and a switch?", "expected_domain": "ethernet", "must_contain": ["switch"]},
+  {"id": "ethernet_04", "question": "What is a MAC address?", "expected_domain": "ethernet", "must_contain": ["mac"]},
+  {"id": "ethernet_05", "question": "What is the maximum cable length for 100BASE-TX?", "expected_domain": "ethernet", "must_contain": ["100"]},
+
+  {"id": "ip_01", "question": "What does a router do?", "expected_domain": "ip", "must_contain": ["facilitate"]},
+  {"id": "ip_02", "question": "What is the OSI model?", "expected_domain": "ip", "must_contain": ["layer"]},
+  {"id": "ip_03", "question": "What does a firewall do?", "expected_domain": "ip", "must_contain": ["firewall"]},
+  {"id": "ip_04", "question": "What is a gateway in networking?", "expected_domain": "ip", "must_contain": ["gateway"]},
+  {"id": "ip_05", "question": "What is the difference between a LAN and a WAN?", "expected_domain": "ip", "must_contain": ["wan"]}
+]
