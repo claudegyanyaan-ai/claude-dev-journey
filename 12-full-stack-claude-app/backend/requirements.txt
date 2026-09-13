@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+psycopg2-binary
+python-dotenv
+passlib[bcrypt]
+bcrypt==4.0.1
+pyjwt
+anthropic
+sentence-transformers
+pymupdf
+pytesseract
+pypdf
+numpy
+mcp
+python-multipart
