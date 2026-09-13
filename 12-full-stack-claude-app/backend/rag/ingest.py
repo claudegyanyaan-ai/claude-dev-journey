@@ -32,6 +32,20 @@ def embed_text(text: str) -> list[float]:
     return _model.encode(text).tolist()
 
 
+def _clean_text(text: str) -> str:
+    """Strip NUL (0x00) bytes from extracted PDF text.
+
+    Some PDFs (depending on their font/encoding) yield extracted text
+    with embedded NUL bytes. Postgres text columns cannot store NUL
+    bytes at all -- it's a hard limitation of Postgres itself, not
+    anything specific to this schema -- so an uncleaned chunk crashes
+    the INSERT with "A string literal cannot contain NUL (0x00)
+    characters." Stripping it here is harmless: NUL isn't a printable
+    character that could appear in real document content anyway.
+    """
+    return text.replace("\x00", "")
+
+
 def ingest_document(pdf_path: str, topic: str, filename: str) -> int:
     """Extract, chunk, embed, and store one PDF's content in Postgres.
 
@@ -56,14 +70,15 @@ def ingest_document(pdf_path: str, topic: str, filename: str) -> int:
             document_id = cur.fetchone()[0]
 
             for chunk in chunks:
-                embedding = embed_text(chunk["text"])
+                clean_text = _clean_text(chunk["text"])
+                embedding = embed_text(clean_text)
                 start_page = chunk["pages"][0]
                 cur.execute(
                     """
                     INSERT INTO chunks (document_id, page_number, chunk_text, embedding)
                     VALUES (%s, %s, %s, %s);
                     """,
-                    (document_id, start_page, chunk["text"], Json(embedding)),
+                    (document_id, start_page, clean_text, Json(embedding)),
                 )
 
     return len(chunks)
