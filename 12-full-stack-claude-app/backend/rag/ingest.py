@@ -14,7 +14,6 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from psycopg2.extras import Json
-from sentence_transformers import SentenceTransformer
 
 import db
 from rag.rag_core import extract_pages, chunk_text
@@ -25,9 +24,23 @@ _model = None  # loaded once per process, on first use
 
 
 def embed_text(text: str) -> list[float]:
-    """Turn a string into an embedding vector using a local sentence-transformers model."""
+    """Turn a string into an embedding vector using a local sentence-transformers model.
+
+    The sentence_transformers import lives inside this function, not at
+    module level -- importing it (and its dependency, torch) costs several
+    hundred MB of RAM just from the import itself, before any model is
+    even loaded. On a memory-constrained deploy (Render's free/starter
+    tiers), that import happening at process startup -- triggered merely
+    by main.py's import chain reaching this module -- was enough by
+    itself to OOM-kill the process before uvicorn ever bound to a port.
+    Deferring the import to first actual use means the server starts
+    and binds its port immediately; the memory cost only lands on
+    whichever request first calls this function (the first /ask or
+    /upload), not on every process startup.
+    """
     global _model
     if _model is None:
+        from sentence_transformers import SentenceTransformer
         _model = SentenceTransformer(MODEL_NAME)
     return _model.encode(text).tolist()
 
