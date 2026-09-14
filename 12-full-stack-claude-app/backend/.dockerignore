@@ -1,0 +1,15 @@
+# Local virtual env and caches -- rebuilt fresh inside the image instead
+.venv/
+__pycache__/
+*.pyc
+
+# Secrets -- these get set as Render environment variables, never baked
+# into the image itself
+.env
+
+# Seed PDFs (dwdm_osnr.pdf, ethernet.pdf, IP.pdf) are only used once, by
+# running rag/ingest.py's __main__ block locally to seed Postgres. The
+# deployed server just queries rows that are already in the database, so
+# these large files (~13MB combined) would only bloat the image for
+# nothing.
+docs/
