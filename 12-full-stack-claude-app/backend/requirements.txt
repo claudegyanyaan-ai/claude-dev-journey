@@ -6,7 +6,7 @@ passlib[bcrypt]
 bcrypt==4.0.1
 pyjwt
 anthropic
-sentence-transformers
+fastembed
 pymupdf
 pytesseract
 pypdf

@@ -1,7 +1,11 @@
 """Embed chunks and load documents into Postgres.
 
-embed_text() turns a string into a vector using a local sentence-transformers
-model (no API call, no cost -- same embedding model used in Projects 8/10).
+embed_text() turns a string into a vector using a local model (no API call,
+no cost -- same embedding model used in Projects 8/10, all-MiniLM-L6-v2).
+Run via fastembed (ONNX Runtime) rather than sentence-transformers (PyTorch)
+-- same model weights and same 384-dim output, so embeddings already stored
+in Postgres from before this switch stay valid, but fastembed needs a small
+fraction of the memory PyTorch does, which matters on a 512MB deploy.
 ingest_document() runs one PDF through rag_core's extract -> chunk pipeline,
 embeds every chunk, and writes the result into the documents/chunks tables
 defined in db.py.
@@ -18,31 +22,32 @@ from psycopg2.extras import Json
 import db
 from rag.rag_core import extract_pages, chunk_text
 
-MODEL_NAME = "all-MiniLM-L6-v2"
+MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"  # fastembed wants the fully-qualified HF name
 
 _model = None  # loaded once per process, on first use
 
 
 def embed_text(text: str) -> list[float]:
-    """Turn a string into an embedding vector using a local sentence-transformers model.
+    """Turn a string into an embedding vector using a local model, run
+    through fastembed (ONNX Runtime) instead of sentence-transformers
+    (PyTorch).
 
-    The sentence_transformers import lives inside this function, not at
-    module level -- importing it (and its dependency, torch) costs several
-    hundred MB of RAM just from the import itself, before any model is
-    even loaded. On a memory-constrained deploy (Render's free/starter
-    tiers), that import happening at process startup -- triggered merely
-    by main.py's import chain reaching this module -- was enough by
-    itself to OOM-kill the process before uvicorn ever bound to a port.
-    Deferring the import to first actual use means the server starts
-    and binds its port immediately; the memory cost only lands on
-    whichever request first calls this function (the first /ask or
-    /upload), not on every process startup.
+    Deferring the import to first actual use (rather than importing at
+    module level) still matters even with the lighter fastembed library --
+    it means the server binds its port immediately on startup, and the
+    model only loads on whichever request first calls this function.
+    Originally this used sentence-transformers directly; that was switched
+    to fastembed after PyTorch's import + inference cost OOM-killed a
+    512MB Render deploy on the very first real /ask request even with the
+    import already deferred -- fastembed runs the identical model weights
+    (same 384-dim output) through a far lighter runtime, so previously
+    stored embeddings remain valid.
     """
     global _model
     if _model is None:
-        from sentence_transformers import SentenceTransformer
-        _model = SentenceTransformer(MODEL_NAME)
-    return _model.encode(text).tolist()
+        from fastembed import TextEmbedding
+        _model = TextEmbedding(model_name=MODEL_NAME)
+    return list(_model.embed([text]))[0].tolist()
 
 
 def _clean_text(text: str) -> str:
