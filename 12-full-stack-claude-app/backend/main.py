@@ -30,11 +30,14 @@ from rag.tools import VALID_TOPICS
 
 app = FastAPI(title="Project 12 - Full-Stack Claude App")
 
-# Wide open for local development. Tighten allow_origins to the actual
-# deployed frontend URL once we deploy (Step: deployment).
+# Tightened to the actual deployed frontend (Vercel) plus localhost for
+# local development -- no longer wide open now that we've deployed.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://docsassistant.vercel.app",
+        "http://localhost:3000",
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
