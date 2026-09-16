@@ -4,7 +4,7 @@ Goal: broad, practical literacy in directing Claude to build real projects — u
 
 ## Status
 - Current tier: 4 / 4
-- Current project: Project 12 (not started, Full-Stack Claude App)
+- Current project: Project 13 (not started, Ship It)
 - Started: 2026-08-18
 
 ## Workflow note (2026-08-19)
@@ -136,6 +136,33 @@ session silently installing its own hooks) — the new hook script and
 `settings.json` had to be handed to the user as files and placed manually,
 same as any other privileged config change.
 
+## Workflow note (2026-09-14 to 2026-09-16) — Project 12's deployment: OS-level deps, import timing vs. compute cost, and a spec/workflow conflict
+Project 12's deployment step surfaced three lessons worth carrying
+forward. First: a dependency that shells out to an OS-level binary
+(here, `pytesseract` -> `tesseract-ocr`) can't be satisfied by a native
+Python-only host runtime at all, no matter what's in `requirements.txt`
+-- Docker isn't just "more control," it's the only way to install a
+non-Python system binary at all on Render. Second, and more subtle:
+deferring a heavy import (`sentence_transformers`, pulling in `torch`)
+from module level into the function that uses it only moves *when* its
+memory cost is paid, not *how much* it costs -- the app stopped
+OOM-crashing at startup, then crashed on the very first real request
+instead, because the actual computation still needed more memory than
+the instance had. The real fix was swapping the underlying runtime
+(`fastembed`/ONNX Runtime in place of PyTorch) to lower the cost itself.
+Third: Project 12's own spec ("GitHub Actions and automated PR/code
+review -- usable directly on the team's shared repo") assumes Pull
+Requests, but `TEAM_WORKFLOW.md` has this team pushing straight to
+`main` with none -- a genuine conflict between a project's spec and this
+team's actual, deliberately-chosen workflow, not a bug in either.
+Resolved by treating one real test PR as a deliberate, one-off learning
+exercise rather than silently adapting the workflow to trigger on push
+instead (which would satisfy the letter of "automate reviews" while
+quietly dropping "PR" from the requirement). That GitHub Actions piece
+was built, then reverted at the user's request before the manual setup
+steps were completed, and is being carried forward as explicitly open,
+not abandoned.
+
 ## Completed Projects
 | # | Project | Finished | Confidence (1–5) | Notes |
 |---|---------|----------|-------------------|-------|
@@ -150,13 +177,16 @@ same as any other privileged config change.
 | 9 | Guardrailed Automation Agent | 2026-09-06 | 3.5/5 | Full pipeline: `extract.py` (Claude-backed, verbatim-only field extraction — never guesses a missing value) → `guardrail.py` (pure auto-write/needs-confirmation logic: completeness, age plausibility, email shape, case-insensitive duplicate check) → `store.py` (safe append-only Excel read/write) → `agent.py` (the CLI tying it together, pausing for a real `[y/N]` human decision whenever guardrail says to). 39 unit tests across the four modules. Two real bugs caught only by testing against the real environment, not the sandbox that built it: a network proxy silently faking a `401 Unauthorized` before requests reached Anthropic, and a Windows-only `openpyxl` file-lock invisible on Linux (see workflow note above for both). Full notes in `09-guardrailed-automation-agent/PROGRESS.md`. |
 | 10 | Multi-Agent Orchestration | 2026-09-08 | 3/5 (self-assessed; formal conceptual close-out check skipped by request) | Orchestrator/subagent pattern: `rag_core.py` (OCR-or-plain extraction, structure-agnostic chunking, embedding, retrieval, grounded answering — generalized from Project 8 to serve three documents) → three domain subagents (`dwdm_osnr`, `ethernet`, `ip`), each its own index/system prompt → `orchestrator.py` (Claude-based domain classification + routing, with a full execution trace: domain, source PDF, exact pages referenced) → `main.py` (interactive loop, one isolated context per question). Real bugs caught: `dwdm_osnr.pdf` had the same vector-graphics-text problem as Project 8's PDF (confirmed byte-identical); a chunk-boundary truncation bug fixed by widening the chunk window (800/150 → 1200/300), which also improved another subagent's answers as a side effect; a corrupted `requirements.txt` (UTF-16 + stray shell-command lines). Also shipped a repo-root `/ask-network` slash command. 4 unit tests passing. This project's PLAN.md "also covers" items — Routines (scheduled prompts) and headless mode — were explicitly skipped, not pursued. Closed out 2026-09-09 with `rebuild_indexes.py`, a scripted build for all three indexes (previously a manual one-off — see Project 11's row below). Full notes in `10-multi-agent-orchestration/PROGRESS.md`. |
 | 11 | Eval & Observability Harness | 2026-09-09 | 3.5/5 (self-assessed) | 15-case eval suite (`eval_cases.json` + `run_eval.py`) scoring the Project 10 orchestrator's domain routing and answer content, one case run at a time through `route()`, writing a timestamped JSON report per run — verified 15/15 both from console output and by reading the saved report back independently. Also built this project's "also covers" items: a `PreToolUse` Claude Code hook (`check-eval-before-commit.sh`) that reruns the full eval before allowing `git commit` and blocks (exit 2) below a 100% threshold or if the eval can't run at all — gating on a fresh real result instead of a self-report. Real discovery: the hook never fires for a `git commit` typed directly into a terminal, only for one Claude Code's own agent runs itself — a materially different (and narrower) scope than a real git-level `pre-commit` hook; the success-path message is still unverified pending a real Claude-Code-driven commit (see 2026-09-09 workflow note above). Also hit and fixed a genuinely stale `.git/index.lock` blocking all commits, and discovered `.claude/` is write-protected from remote file delivery by design. Three atomic commits: `rebuild_indexes.py` (Project 10 gap-closer), the eval harness itself, and the gating hook. Full session notes in `chat-logs/2026-09-09_1412.md`. |
+| 12 | Full-Stack Claude App | 2026-09-16 | 3/5 (self-assessed) | FastAPI + Postgres backend (RAG ingest/retrieve/answer, auth, orchestrator + 4 subagents, MCP server) and a Next.js frontend (auth, topic Q&A, upload modal, PWA support), fully deployed: a Docker-based Render backend (needed for the `tesseract-ocr` OS-level dependency) and a Vercel frontend, with CORS tightened to the real deployed origin. Real deployment detour: Render OOM-crashed under `sentence-transformers`/`torch` even after deferring its import to first use -- fixed by switching to `fastembed` (ONNX Runtime, same model, far less memory; see 2026-09-14->16 workflow note above). The "also covers" GitHub Actions/automated-PR-review item was built, then explicitly reverted and deferred rather than dropped, after finding it conflicts with the team's no-PR workflow. Close-out check: 1 of 3 questions answered cleanly, 2 needed correction -- CORS-vs-authentication is flagged as a new shaky concept, not confirmed understanding. Full session notes in `12-full-stack-claude-app/chat-logs/2026-09-12_1006.md` and `2026-09-16_1005.md`. |
 
 ## Concepts I still find shaky
 - Environment variable lookup order beyond a single simple `.env` file.
 - Full range of Claude API error types beyond 400 (credit) / 401 (auth) — e.g. rate limits, overloaded errors.
 - Git commit hygiene — running `git status` before committing (mostly fixed in Project 4, keep watching).
 - Claude Code hook scope — a `PreToolUse`/`PostToolUse` hook only sees tool calls Claude Code's own agent makes, never commands typed directly into a terminal. Needed a full explanation rather than landing on it independently during Project 11's close-out; revisit if it comes up again.
+- CORS vs. authentication — CORS is a browser rule about which origins' JavaScript can call an API and read the response, independent of whatever auth check the server runs per request. Answered incorrectly as "restricts login" during Project 12's close-out -- a real gap, not just imprecise phrasing; revisit if it comes up again.
 
 ## Next session plan
-- Kick off Project 12: Full-Stack Claude App (small backend + minimal frontend, using the API + one MCP tool + basic auth) — concept area: applied integration. Also covers: GitHub Actions and automated PR/code review, usable directly on the team's shared repo.
-- Open item carried over from Project 11: the eval-gating hook's success path (a real 15/15 run allowing a commit through) hasn't been verified with an actual Claude-Code-driven commit yet — worth doing whenever convenient, not blocking Project 12.
+- Kick off Project 13: Ship It (containerize with Docker, deploy to a real host, manage secrets/env vars, watch cost/rate limits) — concept area: deployment, cost/model optimization. Also covers: Plugins (packaging the team's trusted setup so everyone installs the same working configuration). Worth flagging up front: Project 12's own deployment step already covered Docker, real-host deployment, and secrets/env-var management hands-on — the genuinely new ground here is cost/rate-limit management and the Plugins piece, not re-teaching what's already been done.
+- Open item carried over from Project 11: the eval-gating hook's success path (a real 15/15 run allowing a commit through) hasn't been verified with an actual Claude-Code-driven commit yet — still open, still not blocking anything.
+- Open item carried over from Project 12: GitHub Actions / automated PR review was built, then reverted at the user's request (see 2026-09-14->16 workflow note) — pick back up whenever ready, including the one deliberate test PR needed to actually watch it fire.
