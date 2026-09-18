@@ -12,6 +12,11 @@ Routes:
 and /upload both depend on get_current_username(), which is the single
 place a request's Authorization header actually gets checked -- the
 auth boundary is enforced once here, not repeated per route.
+
+Project 13 addition to /ask: a per-user daily rate limit (rate_limit.py)
+is checked BEFORE the Claude API is ever called -- a blocked request
+costs nothing -- and the question's real token usage (read off Claude's
+own response, not estimated) is logged afterward via usage.py.
 """
 
 import os
@@ -23,6 +28,8 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel
 
 import db
+import rate_limit
+import usage
 from auth import create_access_token, hash_password, verify_password, verify_token
 from orchestrator import route
 from rag.ingest import ingest_document
@@ -102,7 +109,27 @@ def list_topics():
 @app.post("/ask")
 def ask(body: AskRequest, username: str = Depends(get_current_username)):
     _validate_topic(body.topic)
-    return route(body.topic, body.query)
+
+    # Checked BEFORE calling Claude at all: a request over the daily cap
+    # never reaches the API, so it costs nothing. `remaining` is how many
+    # questions were left *before* this one.
+    remaining = rate_limit.check_rate_limit(username)
+
+    result = route(body.topic, body.query)
+
+    # rag.answer's real per-call token counts -- pop it off before the
+    # response goes to the frontend (it's for our own cost logging, not
+    # something the client needs), then log it.
+    token_usage = result.pop("usage", {"input_tokens": 0, "output_tokens": 0, "api_calls": 0})
+    usage.log_usage(
+        username,
+        token_usage["input_tokens"],
+        token_usage["output_tokens"],
+        token_usage["api_calls"],
+    )
+
+    result["requests_remaining_today"] = remaining - 1
+    return result
 
 
 @app.post("/upload")

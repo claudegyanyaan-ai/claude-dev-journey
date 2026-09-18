@@ -13,6 +13,11 @@ is pinned by whichever subagent calls answer_question() and is never
 something Claude's tool call can override; Claude only ever supplies the
 search query. The same search_docs logic also backs mcp_server.py, so an
 external MCP client uses the exact same retrieval code.
+
+Project 13 addition: every client.messages.create() call's real
+`response.usage` (input_tokens, output_tokens) is accumulated across the
+whole loop and returned alongside the answer, so main.py can log and rate
+-limit against what this question actually cost -- not an estimate.
 """
 
 import sys
@@ -56,15 +61,18 @@ def answer_question(topic: str, query: str) -> dict:
     (scoped to `topic`) at least once, and allowing up to MAX_TOOL_ROUNDS
     total search calls if it needs to refine its query.
 
-    Returns {"answer": <text>, "sources": [{"filename", "page_number"}, ...]}.
-    Sources list every chunk returned across all search rounds Claude
-    actually made -- an honest record of what context was used, not a
-    self-report from the model.
+    Returns {"answer": <text>, "sources": [...], "usage": {"input_tokens",
+    "output_tokens", "api_calls"}}. `usage` sums every Claude API call
+    actually made for this question (a multi-round search can mean more
+    than one), read from each response's own `.usage` field.
     """
     client = anthropic.Anthropic()
     tool_schema = search_docs_tool_schema(topic)
     messages = [{"role": "user", "content": query}]
     sources = []
+    total_input_tokens = 0
+    total_output_tokens = 0
+    api_calls = 0
 
     # Force the tool on round 1 -- grounding isn't optional. After that,
     # let Claude decide whether it needs to search again or can answer.
@@ -80,6 +88,9 @@ def answer_question(topic: str, query: str) -> dict:
             tool_choice=tool_choice,
             messages=messages,
         )
+        api_calls += 1
+        total_input_tokens += response.usage.input_tokens
+        total_output_tokens += response.usage.output_tokens
 
         tool_use_block = next(
             (b for b in response.content if b.type == "tool_use"), None
@@ -90,7 +101,15 @@ def answer_question(topic: str, query: str) -> dict:
             answer_text = "\n".join(
                 b.text for b in response.content if b.type == "text"
             )
-            return {"answer": answer_text, "sources": _dedupe_sources(sources)}
+            return {
+                "answer": answer_text,
+                "sources": _dedupe_sources(sources),
+                "usage": {
+                    "input_tokens": total_input_tokens,
+                    "output_tokens": total_output_tokens,
+                    "api_calls": api_calls,
+                },
+            }
 
         search_query = tool_use_block.input.get("query", query)
         chunks = search_topic(topic, search_query, top_k=3)
@@ -140,12 +159,24 @@ def answer_question(topic: str, query: str) -> dict:
         ),
         messages=messages,
     )
+    api_calls += 1
+    total_input_tokens += final_response.usage.input_tokens
+    total_output_tokens += final_response.usage.output_tokens
+
     answer_text = "\n".join(
         b.text for b in final_response.content if b.type == "text"
     ).strip()
     if not answer_text:
         answer_text = "The provided documents don't contain information about this."
-    return {"answer": answer_text, "sources": _dedupe_sources(sources)}
+    return {
+        "answer": answer_text,
+        "sources": _dedupe_sources(sources),
+        "usage": {
+            "input_tokens": total_input_tokens,
+            "output_tokens": total_output_tokens,
+            "api_calls": api_calls,
+        },
+    }
 
 
 if __name__ == "__main__":
@@ -161,3 +192,4 @@ if __name__ == "__main__":
     print("\nSources:")
     for s in result["sources"]:
         print(f"- {s['filename']} p.{s['page_number']}")
+    print(f"\nUsage: {result['usage']}")

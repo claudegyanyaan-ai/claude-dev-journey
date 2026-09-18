@@ -5,7 +5,7 @@ This module owns two things:
 1. get_conn(), which returns a live psycopg2 connection to the Postgres
    database named by DATABASE_URL (loaded from .env) -- reconnecting
    automatically if the held connection has gone stale.
-2. create_tables(), which creates the app's three tables if they don't
+2. create_tables(), which creates the app's tables if they don't
    already exist.
 
 Why get_conn() instead of one connection opened at import time: Neon is
@@ -52,7 +52,7 @@ def get_conn():
 
 
 def create_tables():
-    """Create the users, documents, and chunks tables if they don't exist."""
+    """Create the app's tables if they don't exist."""
     conn = get_conn()
     with conn.cursor() as cur:
         cur.execute("""
@@ -84,6 +84,21 @@ def create_tables():
             );
         """)
 
+        # Project 13: one row per /ask call, logging its REAL token spend
+        # (read off Claude's response.usage, not estimated). Doubles as the
+        # rate-limit counter's source of truth -- see rate_limit.py.
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS usage_log (
+                id SERIAL PRIMARY KEY,
+                username TEXT NOT NULL REFERENCES users(username),
+                created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                input_tokens INTEGER NOT NULL,
+                output_tokens INTEGER NOT NULL,
+                api_calls INTEGER NOT NULL,
+                estimated_cost_usd NUMERIC(10, 6) NOT NULL
+            );
+        """)
+
     conn.commit()
 
 
@@ -112,4 +127,4 @@ def get_user_by_username(username: str) -> str | None:
 
 if __name__ == "__main__":
     create_tables()
-    print("Tables created (or already existed): users, documents, chunks.")
+    print("Tables created (or already existed): users, documents, chunks, usage_log.")
