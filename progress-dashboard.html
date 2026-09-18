@@ -199,7 +199,7 @@
 <script>
 // ---- DATA: your mentor updates this block after each project/milestone ----
 const DATA = {
-  lastUpdated: "2026-09-16",
+  lastUpdated: "2026-09-18",
   // Certification target dropped 2026-08-23 (see PROGRESS.md); goal is now broad literacy, not exam prep. Tier 3 (Projects 8-11) complete. Tier 4: Project 12 done, 13-15 remaining.
   tiers: [
     {
@@ -244,7 +244,8 @@ const DATA = {
       projects: [
         { n: 12, name: "Full-Stack Claude App", domain: "Applied integration", status: "done", finished: "2026-09-16", confidence: 3,
           notes: "FastAPI+Postgres backend (RAG, auth, orchestrator+subagents, MCP server) and Next.js frontend, fully deployed: Docker-based Render backend (tesseract-ocr OS dependency) + Vercel frontend, CORS tightened. Render OOM-crashed under sentence-transformers/torch even after deferring the import -- fixed by switching to fastembed (ONNX Runtime). GitHub Actions/PR-review also-covers item built then reverted/deferred after conflicting with the team's no-PR workflow. Close-out flagged CORS-vs-authentication as a new shaky concept." },
-        { n: 13, name: "Ship It", domain: "Deployment, cost/model optimization", status: "upcoming" },
+        { n: 13, name: "Ship It", domain: "Deployment, cost/model optimization", status: "current",
+          notes: "Part 1 done: per-user daily rate limit (10/day, UTC calendar day) + real token usage/cost logging (usage_log table backs both), added to Project 12's deployed backend. Verified end-to-end (10 successful /ask calls counted down correctly, 11th blocked with 429 before reaching Claude, logged rows showed real non-zero token counts and costs) and confirmed live on Render after a clean auto-redeploy. Hit a new class of bug: the test machine's ISP/router DNS silently refused to resolve the Neon database hostname while resolving everything else fine -- fixed by switching to public DNS. Part 2 (packaging .claude/ tooling as an installable Claude Code plugin) not started yet." },
         { n: 14, name: "Security Review", domain: "Security", status: "upcoming" },
         { n: 15, name: "Capstone (your choice)", domain: "Everything, integrated", status: "upcoming" },
       ]

@@ -4,7 +4,7 @@ Goal: broad, practical literacy in directing Claude to build real projects — u
 
 ## Status
 - Current tier: 4 / 4
-- Current project: Project 13 (not started, Ship It)
+- Current project: Project 13 (Part 1 done -- rate limits & cost logging, deployed; Part 2 -- Plugins -- not started)
 - Started: 2026-08-18
 
 ## Workflow note (2026-08-19)
@@ -163,6 +163,37 @@ was built, then reverted at the user's request before the manual setup
 steps were completed, and is being carried forward as explicitly open,
 not abandoned.
 
+## Workflow note (2026-09-17 to 2026-09-18) -- Project 13 Part 1: a DNS block that looked like a broken database
+Setting up Project 12's backend fresh on the Windows ("vt") machine for
+Project 13 surfaced a new class of environment issue, distinct from every
+prior "code ran but was wrong" lesson: `python db.py` failed with
+`psycopg2.OperationalError: could not translate host name ... to address:
+Name or service not known` against the Neon pooler hostname, even though
+`.env` was correctly filled in and general internet access worked fine
+(`ping google.com` succeeded). Diagnosed with `nslookup`: the machine's own
+ISP/router DNS returned `Query refused` for that one hostname specifically,
+while querying Google's public DNS (`8.8.8.8`) directly resolved it to real
+IPs immediately -- an ISP/router-level DNS filter on that specific
+long/uncommon subdomain, not a bug in the `.env` value, the code, or the
+Neon project. Fixed by switching the machine's DNS servers to `8.8.8.8` /
+`8.8.4.4`. Worth carrying forward: a hostname resolving for one common
+domain (e.g. the Neon website) proves nothing about a different, less
+common hostname (e.g. that project's actual database endpoint) -- test the
+exact hostname the app needs, not a stand-in.
+
+With that resolved, Project 13 Part 1 (per-user daily rate limit of 10,
+UTC calendar-day window, checked before Claude is ever called; real
+token-usage and cost logging via a new `usage_log` table backing both the
+ledger and the rate-limit count) was verified end-to-end: 10 successful
+`/ask` calls counted `requests_remaining_today` down 9->0 correctly, the
+11th was blocked with a 429 before reaching Claude at all, and the logged
+rows showed real non-zero token counts (~2841 input / 250-360 output
+tokens per question) and real costs (~$0.0044-0.0046/question on Haiku
+4.5) -- not zeros or estimates. Committed and pushed (`a1c1ec5`); Render
+auto-redeployed cleanly (41.2s, confirmed green in the dashboard).
+Self-assessed confidence: 3.5/5 (conceptual close-out questions not
+walked through in detail this round, at the user's pace).
+
 ## Completed Projects
 | # | Project | Finished | Confidence (1–5) | Notes |
 |---|---------|----------|-------------------|-------|
@@ -187,6 +218,6 @@ not abandoned.
 - CORS vs. authentication — CORS is a browser rule about which origins' JavaScript can call an API and read the response, independent of whatever auth check the server runs per request. Answered incorrectly as "restricts login" during Project 12's close-out -- a real gap, not just imprecise phrasing; revisit if it comes up again.
 
 ## Next session plan
-- Kick off Project 13: Ship It (containerize with Docker, deploy to a real host, manage secrets/env vars, watch cost/rate limits) — concept area: deployment, cost/model optimization. Also covers: Plugins (packaging the team's trusted setup so everyone installs the same working configuration). Worth flagging up front: Project 12's own deployment step already covered Docker, real-host deployment, and secrets/env-var management hands-on — the genuinely new ground here is cost/rate-limit management and the Plugins piece, not re-teaching what's already been done.
+- Project 13 Part 1 (per-user daily rate limit + real token usage/cost logging, added to Project 12's already-deployed backend) is done, verified end-to-end, and live on Render -- see workflow note above. Next up: Project 13 Part 2 -- Plugins (packaging the repo's `.claude/` tooling -- Project 7's subagent, slash command, hook -- as an installable Claude Code plugin), not yet started.
 - Open item carried over from Project 11: the eval-gating hook's success path (a real 15/15 run allowing a commit through) hasn't been verified with an actual Claude-Code-driven commit yet — still open, still not blocking anything.
 - Open item carried over from Project 12: GitHub Actions / automated PR review was built, then reverted at the user's request (see 2026-09-14->16 workflow note) — pick back up whenever ready, including the one deliberate test PR needed to actually watch it fire.
